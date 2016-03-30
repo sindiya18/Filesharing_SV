@@ -1,0 +1,8 @@
+An option of navigating through the sub-directories will be a great a improvement to the application 
+because the user can visually see which files to upload or which files needs to be downloaded from the folder to the lists. 
+Also allowing the user to be able to upload/download  multiple files at a time will be time-saving and convenient ! 
+
+Instead of setting a variable for the shared, configuring a folder graphically will be convenient and helpful
+for the user to navigate through the folder a lot easier. 
+
+A more appealing and user-friendly UI would be efficient, giving the users a familiarity of the working application 
