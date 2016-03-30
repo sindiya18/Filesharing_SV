@@ -17,16 +17,17 @@ import java.net.Socket;
 
 public class Client extends Application {
 
-    ListView<String> clientList = new ListView<String>();
-    ListView<String> serverList = new ListView<String>();
+    ListView<String> clientFiles = new ListView<String>();
+    ListView<String> serverFiles = new ListView<String>();
     Server server;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        //start the server
+
+        //starting the server
         server = new Server();
 
-        //add hbox to the top of borderpane
+
         HBox hbox = new HBox();
         BorderPane layout = new BorderPane();
         layout.setTop(hbox);
@@ -34,7 +35,7 @@ public class Client extends Application {
         //create the client and server file lists in the table
         SplitPane sp = new SplitPane();;
 
-        sp.getItems().addAll(clientList,serverList);
+        sp.getItems().addAll(clientFiles,serverFiles);
         layout.setCenter(sp);
 
         //DOWNLOAD filename
@@ -43,7 +44,7 @@ public class Client extends Application {
         {
             try
             {
-                String filename = serverList.getSelectionModel().getSelectedItem().toString();
+                String filename = serverFiles.getSelectionModel().getSelectedItem().toString();
                 Socket socket = new Socket("localhost", 8080);
                 PrintWriter out = new PrintWriter(socket.getOutputStream());
                 server.createThread();
@@ -76,7 +77,7 @@ public class Client extends Application {
         Button uploadButton = new Button("Upload");
         uploadButton.setOnAction(event -> {
             try {
-                String filename = clientList.getSelectionModel().getSelectedItem().toString();
+                String filename = clientFiles.getSelectionModel().getSelectedItem().toString();
                 Socket socket = new Socket("localhost", 8080);
                 OutputStream sout = socket.getOutputStream();
                 PrintWriter out = new PrintWriter(sout);
@@ -103,7 +104,7 @@ public class Client extends Application {
                 BorderPane popLayout = new BorderPane();
                 popLayout.setCenter(text);
                 popup.setTitle("Selection Error");
-                popup.setScene(new Scene(popLayout,500,50));
+                popup.setScene(new Scene(popLayout,750, 400));
                 popup.show();
             }
             catch(Exception e) { e.printStackTrace();  }
@@ -150,7 +151,7 @@ public class Client extends Application {
         for (int i = 0; i < files.length; i++) {
             clientFiles.add(files[i].getName().toString());
         }
-        clientList.setItems(clientFiles);
+        clientFiles.setItems(clientFiles);
 
         //update server files
         Socket socket = new Socket("localhost", 8080);
@@ -179,7 +180,7 @@ public class Client extends Application {
             serverFiles.add(fileTitles[i]);
         }
 
-        serverList.setItems(serverFiles);
+        serverFiles.setItems(serverFiles);
     }
 
 
