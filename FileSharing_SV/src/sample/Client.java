@@ -85,6 +85,102 @@ public class Client extends Application {
                 out.println("UPLOAD " + filename);
                 out.flush();
 
+                InputStream fin = new FileInputStream(new File("SharedFolder/" + filename));
+
+                //makes sure server is ready to receive file
+                InputStream ready = socket.getInputStream();
+                ready.read();
+
+                copyAllBytes(fin, sout);
+
+                fin.close();
+                socket.close();
+                Dir();
+            } catch(NullPointerException e) {
+                Stage popup = new Stage();
+                Text text = new Text();
+                text.setText("Please select a file from the left, before clicking upload");
+                BorderPane popLayout = new BorderPane();
+                popLayout.setCenter(text);
+                popup.setTitle("Selection Error");
+                popup.setScene(new Scene(popLayout,500,50));
+                popup.show();
+            }
+            catch(Exception e) { e.printStackTrace();  }
+        });
+
+        //closes down the server
+        Button exitButton = new Button("Exit");
+        exitButton.setOnAction(event ->
+        {
+            try {
+                server.disconnect();
+                primaryStage.close();
+            } catch (Exception e) {}
+        });
+        //add buttons to hbox
+        hbox.getChildren().addAll(downloadButton, uploadButton, exitButton);
+
+        primaryStage.setTitle("File Sharer v1.0");
+        primaryStage.setScene(new Scene(layout, 450, 400));
+        primaryStage.show();
+
+        Dir();
+    }
+
+    private void copyAllBytes(InputStream in, OutputStream out) throws IOException
+    {
+        int cByte = 0;
+        try {
+            while ((cByte = in.read()) != -1) {
+                out.write(cByte);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        out.flush();
+    }
+
+    private void Dir() throws Exception {
+
+        //update client files
+        ObservableList<String> clientFiles = FXCollections.observableArrayList();
+        File folder = new File("SharedFolder/");
+        File[] files = folder.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            clientFiles.add(files[i].getName().toString());
+        }
+        clientList.setItems(clientFiles);
+
+        //update server files
+        Socket socket = new Socket("localhost", 8080);
+        PrintWriter out = new PrintWriter(socket.getOutputStream());
+        server.createThread();
+        out.println("DIR ");
+        out.flush();
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        String titles = "";
+        try
+        {
+            while ((titles = in.readLine()) != null) {
+                break;
+            }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        socket.close();
+
+        ObservableList serverFiles = FXCollections.observableArrayList();
+        String[] fileTitles = titles.split(",");
+        for (int i = 0; i < fileTitles.length; i++)
+        {
+            serverFiles.add(fileTitles[i]);
+        }
+
+        serverList.setItems(serverFiles);
+    }
 
 
         public static void main(String[] args) {
