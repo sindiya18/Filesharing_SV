@@ -1,0 +1,93 @@
+package sample;
+
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SplitPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
+
+import java.io.*;
+import java.net.Socket;
+
+public class Client extends Application {
+
+    ListView<String> clientList = new ListView<String>();
+    ListView<String> serverList = new ListView<String>();
+    Server server;
+
+    @Override
+    public void start(Stage primaryStage) throws Exception{
+        //start the server
+        server = new Server();
+
+        //add hbox to the top of borderpane
+        HBox hbox = new HBox();
+        BorderPane layout = new BorderPane();
+        layout.setTop(hbox);
+
+        //create the client and server file lists in the table
+        SplitPane sp = new SplitPane();;
+
+        sp.getItems().addAll(clientList,serverList);
+        layout.setCenter(sp);
+
+        //DOWNLOAD filename
+        Button downloadButton = new Button("Download");
+        downloadButton.setOnAction(event ->
+        {
+            try
+            {
+                String filename = serverList.getSelectionModel().getSelectedItem().toString();
+                Socket socket = new Socket("localhost", 8080);
+                PrintWriter out = new PrintWriter(socket.getOutputStream());
+                server.createThread();
+
+                out.println("DOWNLOAD " + filename);
+                out.flush();
+
+                OutputStream fout = new FileOutputStream(new File("LocalSharedFolder/" + filename));
+                InputStream in = socket.getInputStream();
+
+                copyAllBytes(in, fout);
+
+                fout.close();
+                socket.close();
+                Dir();
+            }catch(NullPointerException e) {
+                Stage popup = new Stage();
+                Text text = new Text();
+                text.setText("Please select a file from the right, before clicking download");
+                BorderPane popLayout = new BorderPane();
+                popLayout.setCenter(text);
+                popup.setTitle("Selection Error");
+                popup.setScene(new Scene(popLayout,500,50));
+                popup.show();
+            }
+            catch(Exception e) { e.printStackTrace(); }
+        });
+
+        //UPLOAD filename
+        Button uploadButton = new Button("Upload");
+        uploadButton.setOnAction(event -> {
+            try {
+                String filename = clientList.getSelectionModel().getSelectedItem().toString();
+                Socket socket = new Socket("localhost", 8080);
+                OutputStream sout = socket.getOutputStream();
+                PrintWriter out = new PrintWriter(sout);
+                server.createThread();
+
+                out.println("UPLOAD " + filename);
+                out.flush();
+
+
+
+        public static void main(String[] args) {
+        launch(args);
+    }
+};
