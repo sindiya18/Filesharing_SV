@@ -84,7 +84,8 @@ public class Server {
                     in.close();
                 }
 
-                //Server sends an updated list of the server shared files to the client
+                //Server sends an updated list of files
+
                 else if (request[0].equals("DIR")) {
                     File serverFolder = new File("ServerFiles/");
                     File[] files = serverFolder.listFiles();
