@@ -14,6 +14,10 @@ import javafx.stage.Stage;
 import java.io.*;
 import java.net.Socket;
 
+/**
+ * Created by venujan on 25/03/16.
+ */
+
 public class Client extends Application {
     ListView<String> clientFiles = new ListView<String>();
     ListView<String> serverFiles = new ListView<String>();
@@ -24,31 +28,35 @@ public class Client extends Application {
         //starting the server
         server = new Server();
 
-        HBox hbox = new HBox();
+        HBox hbox = new HBox(315);
         BorderPane layout = new BorderPane();
         layout.setTop(hbox);
 
         //creating split table (local/server)
-        SplitPane splitpane = new SplitPane();;
+        SplitPane splitpane = new SplitPane();
 
+        //getting files and adding to split panes
         splitpane.getItems().addAll(clientFiles, serverFiles);
         layout.setCenter(splitpane);
 
-        //DOWNLOAD filename
+        //DOWNLOAD button action on click
         Button downloadButton = new Button("Download");
         downloadButton.setOnAction(event ->
         {
             try
             {
                 String filename = serverFiles.getSelectionModel().getSelectedItem().toString();
+
+                //connecting to localhost with port 8080
                 Socket socket = new Socket("localhost", 8080);
                 PrintWriter out = new PrintWriter(socket.getOutputStream());
                 server.createThread();
 
+                //listening to "DOWNLOAD" command
                 out.println("DOWNLOAD " + filename);
                 out.flush();
 
-                OutputStream fout = new FileOutputStream(new File("LocalSharedFolder/" + filename));
+                OutputStream fout = new FileOutputStream(new File("SharedFolder/" + filename));
                 InputStream in = socket.getInputStream();
 
                 copyAllBytes(in, fout);
@@ -60,7 +68,7 @@ public class Client extends Application {
             catch(Exception e) { e.printStackTrace(); }
         });
 
-        //UPLOAD filename
+        //UPLOAD button on click action
         Button uploadButton = new Button("Upload");
         uploadButton.setOnAction(event -> {
             try {
@@ -75,9 +83,9 @@ public class Client extends Application {
 
                 InputStream fin = new FileInputStream(new File("SharedFolder/" + filename));
 
-                //makes sure server is ready to receive file
-                InputStream ready = socket.getInputStream();
-                ready.read();
+                //makes sure server is open to receive file
+                InputStream open = socket.getInputStream();
+                open.read();
 
                 copyAllBytes(fin, sout);
 
@@ -88,19 +96,9 @@ public class Client extends Application {
             catch(Exception e) { e.printStackTrace();  }
         });
 
-        //closes down the server
-        Button exitButton = new Button("Exit");
-        exitButton.setOnAction(event ->
-        {
-            try {
-                server.disconnect();
-                primaryStage.close();
-            } catch (Exception e) {}
-        });
-        //add buttons to hbox
-        hbox.getChildren().addAll(downloadButton, uploadButton, exitButton);
+        hbox.getChildren().addAll(uploadButton, downloadButton);
 
-        primaryStage.setTitle("File Sharer v1.0");
+        primaryStage.setTitle("File Sharing Application");
         primaryStage.setScene(new Scene(layout, 750, 500));
         primaryStage.show();
 
@@ -122,7 +120,7 @@ public class Client extends Application {
 
     private void Dir() throws Exception {
 
-        //update client files
+        //setting client FileNames
         ObservableList<String> clientFiles = FXCollections.observableArrayList();
         File folder = new File("SharedFolder/");
         File[] files = folder.listFiles();
@@ -131,7 +129,7 @@ public class Client extends Application {
         }
         this.clientFiles.setItems(clientFiles);
 
-        //update server files
+        // connecting to localhost through port 8080
         Socket socket = new Socket("localhost", 8080);
         PrintWriter out = new PrintWriter(socket.getOutputStream());
         server.createThread();
@@ -151,11 +149,12 @@ public class Client extends Application {
         }
         socket.close();
 
+        //array for holding Filenames
         ObservableList serverFiles = FXCollections.observableArrayList();
-        String[] fileTitles = titles.split(",");
-        for (int i = 0; i < fileTitles.length; i++)
+        String[] fileNames = titles.split(",");
+        for (int i = 0; i < fileNames.length; i++)
         {
-            serverFiles.add(fileTitles[i]);
+            serverFiles.add(fileNames[i]);
         }
 
         this.serverFiles.setItems(serverFiles);

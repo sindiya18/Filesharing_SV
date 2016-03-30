@@ -5,7 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * Created by venujan on 29/03/16.
+ * Created by venujan on 27/03/16.
  */
 public class Server {
 
@@ -16,6 +16,7 @@ public class Server {
         serverSocket = new ServerSocket(8080);
     }
 
+    //accept connection
     public void createThread() throws Exception {
         clientSocket = serverSocket.accept();
         ServerThread clientHandler = new ServerThread(clientSocket);
@@ -29,6 +30,7 @@ public class Server {
     }
 
     public class ServerThread implements Runnable {
+
         BufferedReader in = null;
         InputStream is = null;
         InputStreamReader isr = null;
@@ -50,14 +52,14 @@ public class Server {
                 requestLine = in.readLine();
                 String[] request = requestLine.split(" ");
 
-                //Client uploads and server downloads
+                //Client uploads and server downloads files
+
                 if (request[0].equals("UPLOAD")) {
                     String filename = request[1];
 
                     InputStream sin = clientSocket.getInputStream();
                     OutputStream out = new FileOutputStream(new File("ServerFiles/" + filename));
 
-                    //lets client know its ready to receive file
                     OutputStream ready = clientSocket.getOutputStream();
                     ready.write(1);
 
@@ -68,10 +70,11 @@ public class Server {
                     in.close();
                 }
 
-                //Client downloads and server uploads
+                //Client downloads and server uploads files
                 else if (request[0].equals("DOWNLOAD")) {
                     String filename = request[1];
 
+                    //copying file to serverfolder location
                     OutputStream out = clientSocket.getOutputStream();
                     InputStream fin = new FileInputStream(new File("ServerFiles/" + filename));
                     copyAllBytes(fin, out);
