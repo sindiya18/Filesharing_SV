@@ -73,7 +73,7 @@ public class Server {
                     String filename = request[1];
 
                     OutputStream out = clientSocket.getOutputStream();
-                    InputStream fin = new FileInputStream(new File("ServerSharedFolder/" + filename));
+                    InputStream fin = new FileInputStream(new File("ServerFiles/" + filename));
                     copyAllBytes(fin, out);
 
                     fin.close();

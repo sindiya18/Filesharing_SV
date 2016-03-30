@@ -9,34 +9,30 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.*;
 import java.net.Socket;
 
 public class Client extends Application {
-
     ListView<String> clientFiles = new ListView<String>();
     ListView<String> serverFiles = new ListView<String>();
     Server server;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-
         //starting the server
         server = new Server();
-
 
         HBox hbox = new HBox();
         BorderPane layout = new BorderPane();
         layout.setTop(hbox);
 
-        //create the client and server file lists in the table
-        SplitPane sp = new SplitPane();;
+        //creating split table (local/server)
+        SplitPane splitpane = new SplitPane();;
 
-        sp.getItems().addAll(clientFiles,serverFiles);
-        layout.setCenter(sp);
+        splitpane.getItems().addAll(clientFiles, serverFiles);
+        layout.setCenter(splitpane);
 
         //DOWNLOAD filename
         Button downloadButton = new Button("Download");
@@ -60,15 +56,6 @@ public class Client extends Application {
                 fout.close();
                 socket.close();
                 Dir();
-            }catch(NullPointerException e) {
-                Stage popup = new Stage();
-                Text text = new Text();
-                text.setText("Please select a file from the right, before clicking download");
-                BorderPane popLayout = new BorderPane();
-                popLayout.setCenter(text);
-                popup.setTitle("Selection Error");
-                popup.setScene(new Scene(popLayout,500,50));
-                popup.show();
             }
             catch(Exception e) { e.printStackTrace(); }
         });
@@ -97,15 +84,6 @@ public class Client extends Application {
                 fin.close();
                 socket.close();
                 Dir();
-            } catch(NullPointerException e) {
-                Stage popup = new Stage();
-                Text text = new Text();
-                text.setText("Please select a file from the left, before clicking upload");
-                BorderPane popLayout = new BorderPane();
-                popLayout.setCenter(text);
-                popup.setTitle("Selection Error");
-                popup.setScene(new Scene(popLayout,750, 400));
-                popup.show();
             }
             catch(Exception e) { e.printStackTrace();  }
         });
@@ -123,7 +101,7 @@ public class Client extends Application {
         hbox.getChildren().addAll(downloadButton, uploadButton, exitButton);
 
         primaryStage.setTitle("File Sharer v1.0");
-        primaryStage.setScene(new Scene(layout, 450, 400));
+        primaryStage.setScene(new Scene(layout, 750, 500));
         primaryStage.show();
 
         Dir();
@@ -151,7 +129,7 @@ public class Client extends Application {
         for (int i = 0; i < files.length; i++) {
             clientFiles.add(files[i].getName().toString());
         }
-        clientFiles.setItems(clientFiles);
+        this.clientFiles.setItems(clientFiles);
 
         //update server files
         Socket socket = new Socket("localhost", 8080);
@@ -180,7 +158,7 @@ public class Client extends Application {
             serverFiles.add(fileTitles[i]);
         }
 
-        serverFiles.setItems(serverFiles);
+        this.serverFiles.setItems(serverFiles);
     }
 
 
